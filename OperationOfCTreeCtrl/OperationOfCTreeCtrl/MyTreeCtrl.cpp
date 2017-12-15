@@ -59,13 +59,12 @@ void CMyTreeCtrl::DrawItem(CDC * pDC, HTREEITEM hItem)
 	pDC->DrawText(wcsText, rtText, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 }
 
-void CMyTreeCtrl::SetAnyItemHeight(HTREEITEM hItem, short yNewHeight)
+void CMyTreeCtrl::SetAnyItemHeightRatioInInt(HTREEITEM hItem, short yNewHeightRatioInInt)
 {
 	TVITEMEX iex{};
 	iex.mask = TVIF_INTEGRAL;
 	iex.hItem = hItem;
-	short yOldHeight = GetItemHeight();
-	iex.iIntegral = yNewHeight / yOldHeight;
+	iex.iIntegral = yNewHeightRatioInInt;
 	SendMessage(TVM_SETITEM, 0, LPARAM(&iex));
 }
 
@@ -115,11 +114,17 @@ void CMyTreeCtrl::OnNMClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	HTREEITEM hItem = HitTest(&hti);
 
-	//
-	if (ItemHasChildren(hti.hItem))
-		Expand(hti.hItem, TVE_TOGGLE);
+	// 展开
+	if (ItemHasChildren(hItem))
+		Expand(hItem, TVE_TOGGLE);
 
-	//
+	// 尺寸变更
+	if (hPreItem && (hPreItem != hItem))
+		SetAnyItemHeightRatioInInt(hPreItem, 1);
+	SetAnyItemHeightRatioInInt(hItem, 2);
+
+	// 更新旧项
+	hPreItem = hItem;
 
 	// 
 	*pResult = 0;
@@ -136,13 +141,14 @@ void CMyTreeCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 void CMyTreeCtrl::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// 可以用SetItemData()把原尺寸,图片放到项里.还原就不会有bug.
+	// 这里有bug,点父节点时.
 
-	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	//LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
-	SetRedraw(FALSE);
-	SetAnyItemHeight(pNMTreeView->itemOld.hItem, 0x12);
-	SetAnyItemHeight(pNMTreeView->itemNew.hItem, 0x24);
-	SetRedraw(TRUE);
+	//SetRedraw(FALSE);
+	//SetAnyItemHeightRatioInInt(pNMTreeView->itemOld.hItem, 1);
+	//SetAnyItemHeightRatioInInt(pNMTreeView->itemNew.hItem, 2);
+	//SetRedraw(TRUE);
 
 	*pResult = 0;
 }
