@@ -26,5 +26,6 @@ public:
 	afx_msg void OnNMClick(NMHDR *pNMHDR, LRESULT *pResult);		// 实现项的单击响应
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);		// 取消项的双击响应
 	afx_msg void OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);	// 实现改变项时的响应
+	afx_msg void OnTvnItemChanged(NMHDR *pNMHDR, LRESULT *pResult);	// 这里实现新项与旧项的变更更好
 };
 

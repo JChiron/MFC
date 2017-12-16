@@ -81,6 +81,7 @@ BEGIN_MESSAGE_MAP(CMyTreeCtrl, CTreeCtrl)
 	ON_WM_LBUTTONDBLCLK()
 	ON_NOTIFY_REFLECT(NM_CLICK, &CMyTreeCtrl::OnNMClick)
 	ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CMyTreeCtrl::OnTvnSelchanged)
+	ON_NOTIFY_REFLECT(TVN_ITEMCHANGED, &CMyTreeCtrl::OnTvnItemChanged)
 END_MESSAGE_MAP()
 
 
@@ -119,9 +120,9 @@ void CMyTreeCtrl::OnNMClick(NMHDR *pNMHDR, LRESULT *pResult)
 		Expand(hItem, TVE_TOGGLE);
 
 	// 尺寸变更
-	if (hPreItem && (hPreItem != hItem))
-		SetAnyItemHeightRatioInInt(hPreItem, 1);
-	SetAnyItemHeightRatioInInt(hItem, 2);
+	//if (hPreItem && (hPreItem != hItem))
+	//	SetAnyItemHeightRatioInInt(hPreItem, 1);
+	//SetAnyItemHeightRatioInInt(hItem, 2);
 
 	// 更新旧项
 	hPreItem = hItem;
@@ -149,6 +150,24 @@ void CMyTreeCtrl::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 	//SetAnyItemHeightRatioInInt(pNMTreeView->itemOld.hItem, 1);
 	//SetAnyItemHeightRatioInInt(pNMTreeView->itemNew.hItem, 2);
 	//SetRedraw(TRUE);
+
+	*pResult = 0;
+}
+
+
+void CMyTreeCtrl::OnTvnItemChanged(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	/*
+	调试可知 (pNMTVItemChange->uStateNew & 0x2) == 0x2 时,pNMTVItemChange为新项;
+			 (pNMTVItemChange->uStateNew & 0xfff0) == 0x0 时,pNMTVItemChange为旧项;
+	*/
+
+	NMTVITEMCHANGE *pNMTVItemChange = reinterpret_cast<NMTVITEMCHANGE*>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	if (pNMTVItemChange->uStateNew & 0x2)
+		SetAnyItemHeightRatioInInt(pNMTVItemChange->hItem, 2);
+	else
+		SetAnyItemHeightRatioInInt(pNMTVItemChange->hItem, 1);
 
 	*pResult = 0;
 }
